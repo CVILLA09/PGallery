@@ -1,8 +1,10 @@
 import Scene from "@/components/Scene/Scene";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
     <main className="relative w-full">
+      <ThemeToggle />
       <div className="canvas-container">
         <Scene />
       </div>

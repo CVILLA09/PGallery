@@ -1,26 +1,42 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { Suspense } from 'react';
+import CameraRig from './CameraRig';
 import Retrato from '../Portrait/Retrato';
 import Galeria from '../Gallery/Galeria';
-import CameraRig from './CameraRig';
+import { useState, useEffect } from 'react';
 
 export default function Scene() {
+    const [bgColor, setBgColor] = useState('#ffffff');
+
+    useEffect(() => {
+        // Initial check
+        const updateBg = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            setBgColor(isDark ? '#000000' : '#ffffff');
+        };
+
+        updateBg();
+
+        // Watch for class changes
+        const observer = new MutationObserver(updateBg);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class'],
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <Canvas
-            camera={{ position: [0, 0, 5], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-            className="w-full h-full"
+            camera={{ position: [0, 0, 40], fov: 50 }}
+            style={{ background: bgColor, transition: 'background-color 0.3s ease' }}
         >
-            <color attach="background" args={['#ffffff']} />
-            <ambientLight intensity={0.5} />
-
-            <Suspense fallback={null}>
-                <CameraRig />
-                <Retrato />
-                <Galeria />
-            </Suspense>
+            <CameraRig />
+            <Retrato />
+            <Galeria />
+            <fog attach="fog" args={[bgColor, 10, 50]} />
         </Canvas>
     );
 }
