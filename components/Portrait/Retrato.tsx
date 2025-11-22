@@ -1,8 +1,6 @@
-'use client';
-
 import { useRef, useMemo } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { TextureLoader, Vector2 } from 'three';
 import { vertexShader, psychedelicFragmentShader, hallucinationFragmentShader } from './RetratoShader';
 
 export default function Retrato() {
@@ -16,6 +14,7 @@ export default function Retrato() {
     const psychedelicUniforms = useMemo(
         () => ({
             uTime: { value: 0 },
+            uMouse: { value: new Vector2(0, 0) },
         }),
         []
     );
@@ -30,9 +29,17 @@ export default function Retrato() {
 
     useFrame((state) => {
         const time = state.clock.getElapsedTime();
-        if (topStripRef.current) topStripRef.current.material.uniforms.uTime.value = time;
+        const pointer = state.pointer; // Normalized coordinates (-1 to 1)
+
+        if (topStripRef.current) {
+            topStripRef.current.material.uniforms.uTime.value = time;
+            topStripRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
+        }
         if (middleStripRef.current) middleStripRef.current.material.uniforms.uTime.value = time;
-        if (bottomStripRef.current) bottomStripRef.current.material.uniforms.uTime.value = time;
+        if (bottomStripRef.current) {
+            bottomStripRef.current.material.uniforms.uTime.value = time;
+            bottomStripRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
+        }
     });
 
     return (
