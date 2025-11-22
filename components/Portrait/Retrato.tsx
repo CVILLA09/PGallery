@@ -1,5 +1,9 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 import {
     TextureLoader,
     Vector2,
@@ -14,7 +18,7 @@ import {
     NearestFilter,
     ClampToEdgeWrapping
 } from 'three';
-import { vertexShader, psychedelicFragmentShader, hallucinationFragmentShader, borderFragmentShader, simulationFragmentShader } from './RetratoShader';
+import { vertexShader, psychedelicFragmentShader, hallucinationFragmentShader, simulationFragmentShader } from './RetratoShader';
 
 export default function Retrato() {
     const topStripRef = useRef<any>(null);
@@ -81,6 +85,30 @@ export default function Retrato() {
 
     // Store brush UV position
     const brushUv = useRef(new Vector2(-10, -10));
+
+    // Setup scroll-driven animations for strip width
+    useEffect(() => {
+        if (!topStripRef.current || !bottomStripRef.current || !borderRef.current) return;
+
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 1,
+            }
+        });
+
+        // Animate scale.x from 1 to 2 as we scroll/zoom in (includes border now)
+        tl.to([topStripRef.current.scale, bottomStripRef.current.scale, borderRef.current.scale], {
+            x: 2,
+            ease: 'none',
+        }, 0);
+
+        return () => {
+            tl.kill();
+        };
+    }, []);
 
     useFrame((state) => {
         const time = state.clock.getElapsedTime();
@@ -160,13 +188,13 @@ export default function Retrato() {
                 />
             </mesh>
 
-            {/* Animated Border - Slightly in front of eyes */}
-            <mesh ref={borderRef} position={[0, 0, 0.01]}>
+            {/* Background Rectangle - Behind central image, reveals on scroll */}
+            <mesh ref={borderRef} position={[0, 0, -0.01]}>
                 <planeGeometry args={[22, 8, 32, 32]} />
                 <shaderMaterial
                     vertexShader={vertexShader}
-                    fragmentShader={borderFragmentShader}
-                    uniforms={psychedelicUniforms} // Reuse same uniforms
+                    fragmentShader={psychedelicFragmentShader}
+                    uniforms={psychedelicUniforms} // Use same uniforms as strips
                     transparent
                 />
             </mesh>
