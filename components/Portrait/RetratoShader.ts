@@ -145,31 +145,78 @@ export const borderFragmentShader = `
   }
 `;
 
-// --- HALLUCINATION SHADER (Central Eyes) ---
+// --- SIMULATION SHADER (Brush Trails & Decay) ---
+export const simulationFragmentShader = `
+  uniform sampler2D uTexture;
+  uniform vec2 uMouse;
+  uniform vec2 uResolution;
+  uniform float uTime;
+  varying vec2 vUv;
+
+  void main() {
+    // Sample previous frame
+    vec4 current = texture2D(uTexture, vUv);
+    
+    // Calculate mouse distance (adjust for aspect ratio if needed, but simple distance works for now)
+    // We assume UVs are 0-1. Mouse is 0-1.
+    float dist = distance(vUv, uMouse);
+    
+    // Brush size and softness
+    float brushSize = 0.05;
+    float brush = smoothstep(brushSize, 0.0, dist);
+    
+    // Add new ink to current state
+    // We use the red channel for "displacement intensity"
+    float intensity = current.r;
+    
+    // Add brush influence
+    intensity += brush * 0.5; // Add ink
+    
+    // Decay (Auto-clean)
+    intensity *= 0.96; // Fade out factor (0.96 = slow fade, 0.9 = fast)
+    
+    // Clamp
+    intensity = clamp(intensity, 0.0, 1.0);
+    
+    gl_FragColor = vec4(intensity, 0.0, 0.0, 1.0);
+  }
+`;
+
+// --- HALLUCINATION SHADER (Central Eyes + Watercolor Distortion) ---
 export const hallucinationFragmentShader = `
   uniform sampler2D uTexture;
+  uniform sampler2D uDisplacement; // From simulation
   uniform float uTime;
   varying vec2 vUv;
 
   void main() {
     vec2 uv = vUv;
     
-    // Subtle breathing/warping effect
-    float warp = sin(uv.y * 20.0 + uTime) * 0.002;
-    uv.x += warp;
+    // Sample displacement map
+    vec4 disp = texture2D(uDisplacement, uv);
+    float displacement = disp.r; // Intensity of the brush
     
-    // Color shift (Chromatic Aberration)
-    float offset = 0.003 * sin(uTime * 2.0);
-    vec4 r = texture2D(uTexture, uv + vec2(offset, 0.0));
-    vec4 g = texture2D(uTexture, uv);
-    vec4 b = texture2D(uTexture, uv - vec2(offset, 0.0));
+    // Watercolor Distortion
+    // Warp UVs based on displacement intensity
+    // We add some noise to the distortion to make it look like liquid diffusion
+    float noise = sin(uv.x * 20.0 + uTime) * cos(uv.y * 20.0 + uTime);
     
-    // Slight color cycling overlay
-    vec3 tint = 0.5 + 0.5 * cos(uTime * 0.5 + uv.xyx + vec3(0, 2, 4));
+    vec2 distortedUv = uv;
+    distortedUv.x += displacement * 0.05 * sin(uTime * 2.0 + uv.y * 10.0);
+    distortedUv.y += displacement * 0.05 * cos(uTime * 1.5 + uv.x * 10.0);
     
-    vec4 finalColor = vec4(r.r, g.g, b.b, 1.0);
+    // Chromatic Aberration based on displacement
+    float shift = displacement * 0.02;
     
-    // Blend original with subtle tint
-    gl_FragColor = mix(finalColor, vec4(tint, 1.0), 0.1);
+    vec4 r = texture2D(uTexture, distortedUv + vec2(shift, 0.0));
+    vec4 g = texture2D(uTexture, distortedUv);
+    vec4 b = texture2D(uTexture, distortedUv - vec2(shift, 0.0));
+    
+    vec4 color = vec4(r.r, g.g, b.b, 1.0);
+    
+    // Add a slight "wet" highlight where displacement is high
+    color.rgb += vec3(0.1) * displacement;
+    
+    gl_FragColor = color;
   }
 `;
