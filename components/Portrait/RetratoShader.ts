@@ -71,6 +71,80 @@ export const psychedelicFragmentShader = `
   }
 `;
 
+// --- ANIMATED BORDER SHADER (Central Image Frame) ---
+export const borderFragmentShader = `
+  uniform float uTime;
+  uniform vec2 uMouse;
+  varying vec2 vUv;
+
+  // Palette 1
+  vec3 col1 = vec3(0.651, 0.141, 0.329); // #A62454
+  vec3 col2 = vec3(0.510, 0.216, 0.549); // #82378C
+  vec3 col3 = vec3(0.396, 0.651, 0.325); // #65A653
+  vec3 col4 = vec3(0.651, 0.576, 0.216); // #A69337
+  vec3 col5 = vec3(0.651, 0.173, 0.129); // #A62C21
+
+  // Palette 2
+  vec3 col6 = vec3(0.651, 0.427, 0.486); // #A66D7C
+  vec3 col7 = vec3(0.204, 0.090, 0.451); // #341773
+  vec3 col8 = vec3(0.522, 0.549, 0.290); // #858C4A
+  vec3 col9 = vec3(0.949, 0.949, 0.949); // #F2F2F2
+  vec3 col10 = vec3(0.051, 0.051, 0.051); // #0D0D0D
+
+  void main() {
+    vec2 uv = vUv;
+    
+    // Border Mask Logic
+    // Aspect ratio is roughly 22:8 (~2.75:1)
+    // We want a very thin border, say 0.0025 units relative to UV
+    float borderX = 0.0025; 
+    float borderY = 0.0025 * 2.75; // Adjust for aspect ratio to keep thickness consistent visually
+    
+    // Create a box mask: 0 inside the border, 1 on the border
+    float maskX = step(borderX, uv.x) * step(uv.x, 1.0 - borderX);
+    float maskY = step(borderY, uv.y) * step(uv.y, 1.0 - borderY);
+    float centerMask = maskX * maskY;
+    
+    if (centerMask > 0.5) {
+      discard; // Remove center pixels
+    }
+
+    // --- REUSE FLUID LOGIC FOR THE BORDER ---
+    
+    // Global Interaction - ULTRA SENSITIVE
+    vec2 mouseInfluence = uMouse * 10.0; 
+    
+    // Create organic, lava-lamp-like distortion
+    float waveX = sin(uv.y * 5.0 + uTime + mouseInfluence.x) * 0.2; 
+    float waveY = cos(uv.x * 5.0 + uTime + mouseInfluence.y) * 0.2;
+    
+    uv.x += waveX;
+    uv.y += waveY;
+    
+    // Dynamic pattern generation
+    float p1 = sin(uv.x * 3.0 + uTime + mouseInfluence.x);
+    float p2 = cos(uv.y * 3.0 - uTime * 0.5 + mouseInfluence.y);
+    float p3 = sin((uv.x + uv.y) * 5.0 + uTime + length(uMouse) * 5.0); 
+    
+    float mixFactor = (p1 + p2 + p3) / 3.0; 
+    mixFactor = mixFactor * 0.5 + 0.5; 
+    
+    // Color mixing logic
+    vec3 finalColor = mix(col1, col2, uv.x + sin(uTime * 0.5 + mouseInfluence.x * 0.5));
+    finalColor = mix(finalColor, col3, uv.y + cos(uTime * 0.5 + mouseInfluence.y * 0.5));
+    finalColor = mix(finalColor, col4, mixFactor);
+    
+    // Add "Lava Lamp" blobs
+    float mouseDist = distance(vUv, uMouse * 0.5 + 0.5); 
+    float blob = smoothstep(1.5, 0.0, mouseDist); 
+    
+    finalColor = mix(finalColor, col7, blob * 0.4); 
+    finalColor += col9 * blob * 0.15; 
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
 // --- HALLUCINATION SHADER (Central Eyes) ---
 export const hallucinationFragmentShader = `
   uniform sampler2D uTexture;
