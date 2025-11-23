@@ -22,9 +22,12 @@ function MovingCloud({
     // We'll use a ref to track current X to avoid re-renders if we were using state
 
     useFrame((state, delta) => {
+        // Clamp delta to prevent huge jumps when resuming from paused frameloop
+        const safeDelta = Math.min(delta, 0.1);
+
         if (groupRef.current) {
             // Move along X axis
-            groupRef.current.position.x += delta * speed;
+            groupRef.current.position.x += safeDelta * speed;
 
             // Reset position when it goes off screen to the right
             // Camera is at z=20, fov=75. At z=-10 (dist=30), visible width is ~80 units.
@@ -48,7 +51,7 @@ function MovingCloud({
 
 function CloudScene() {
     return (
-        <Clouds material={THREE.MeshBasicMaterial}>
+        <Clouds>
             {/* Main large clouds - spread vertically */}
             <MovingCloud speed={0.4} segments={40} bounds={[10, 2, 2]} volume={10} color="white" fade={10} position={[0, 10, -5]} />
             <MovingCloud speed={0.3} seed={1} scale={2} volume={5} color="white" fade={10} position={[25, -8, -10]} />
@@ -79,11 +82,19 @@ export default function CloudsBackground() {
 
     return (
         <div
-            className={`fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
-            style={{ background: 'linear-gradient(to bottom, #A9CCDD, #8DBCDC)' }}
+            className="fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-opacity duration-1000 ease-in-out"
+            style={{
+                background: 'linear-gradient(to bottom, #A9CCDD, #8DBCDC)',
+                opacity: visible ? 1 : 0,
+            }}
         >
-            <Canvas camera={{ position: [0, 0, 20], fov: 75 }}>
-                <ambientLight intensity={0.8} />
+            <Canvas
+                camera={{ position: [0, 0, 20], fov: 75 }}
+                frameloop={visible ? 'always' : 'never'}
+            >
+                {/* Strong lighting to ensure clouds are white, not gray */}
+                <ambientLight intensity={2.5} />
+                <directionalLight position={[0, 10, 5]} intensity={1.5} color="white" />
                 <CloudScene />
             </Canvas>
         </div>
