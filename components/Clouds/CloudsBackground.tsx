@@ -77,11 +77,9 @@ export default function CloudsBackground() {
     const isDark = useThemeMode();
     const visible = !isDark;
 
-    if (!visible) return null;
-
     return (
         <div
-            className="fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-colors duration-500"
+            className={`fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-opacity duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
             style={{ background: 'linear-gradient(to bottom, #A9CCDD, #8DBCDC)' }}
         >
             <Canvas camera={{ position: [0, 0, 20], fov: 75 }}>

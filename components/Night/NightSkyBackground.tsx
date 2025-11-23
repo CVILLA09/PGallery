@@ -61,11 +61,9 @@ function StarField() {
 export default function NightSkyBackground() {
     const isDark = useThemeMode();
 
-    if (!isDark) return null;
-
     return (
         <div
-            className="fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-colors duration-1000"
+            className={`fixed inset-0 z-[-1] pointer-events-none w-full h-full transition-opacity duration-500 ${isDark ? 'opacity-100' : 'opacity-0'}`}
             style={{
                 background: 'linear-gradient(to bottom, #020615, #050b1a)', // Darker deep night gradient
             }}
