@@ -69,26 +69,13 @@ function CloudScene() {
     );
 }
 
+import { useThemeMode } from '@/hooks/useThemeMode';
+
+// ... (MovingCloud and CloudScene components remain unchanged)
+
 export default function CloudsBackground() {
-    const [visible, setVisible] = useState(true);
-
-    useEffect(() => {
-        const checkTheme = () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            // Visible only in Day mode (not dark)
-            setVisible(!isDark);
-        };
-
-        checkTheme();
-
-        const observer = new MutationObserver(checkTheme);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class'],
-        });
-
-        return () => observer.disconnect();
-    }, []);
+    const isDark = useThemeMode();
+    const visible = !isDark;
 
     if (!visible) return null;
 

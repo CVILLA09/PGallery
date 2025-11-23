@@ -1,11 +1,13 @@
 import Scene from "@/components/Scene/Scene";
 import ThemeToggle from "@/components/ThemeToggle";
 import CloudsBackground from "@/components/Clouds/CloudsBackground";
+import NightSkyBackground from "@/components/Night/NightSkyBackground";
 
 export default function Home() {
   return (
     <main className="relative w-full">
       <CloudsBackground />
+      <NightSkyBackground />
       <ThemeToggle />
       <div className="canvas-container">
         <Scene />

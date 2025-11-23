@@ -28,10 +28,10 @@ export default function Scene() {
         return () => observer.disconnect();
     }, []);
 
-    // Day mode: Transparent background (to show clouds), White fog (to blend with clouds)
-    // Night mode: Black background, Black fog
-    const bgColor = isDark ? '#000000' : 'transparent';
-    const fogColor = isDark ? '#000000' : '#ffffff';
+    // Both modes: Transparent background (to show Clouds or Night Sky behind)
+    // Fog color: White for Day (blends with clouds), Black/Dark for Night (blends with space)
+    const bgColor = 'transparent';
+    const fogColor = isDark ? '#020617' : '#ffffff'; // Dark slate for night fog to match sky
 
     return (
         <Canvas
