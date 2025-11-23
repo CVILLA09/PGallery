@@ -1,4 +1,4 @@
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useEffect, useState } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
@@ -55,7 +55,8 @@ export default function Retrato() {
                 uTexture: { value: null },
                 uMouse: { value: new Vector2(0.5, 0.5) },
                 uResolution: { value: new Vector2(512, 512) },
-                uTime: { value: 0 }
+                uTime: { value: 0 },
+                uBrushActive: { value: 0 }, // Start inactive
             }
         });
 
@@ -85,6 +86,8 @@ export default function Retrato() {
 
     // Store brush UV position
     const brushUv = useRef(new Vector2(-10, -10));
+    const [brushActive, setBrushActive] = useState(0); // 0 = inactive, 1 = active
+    const mouseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Setup scroll-driven animations for strip width
     useEffect(() => {
@@ -120,6 +123,7 @@ export default function Retrato() {
             simMesh.material.uniforms.uTime.value = time;
             simMesh.material.uniforms.uMouse.value.copy(brushUv.current);
             simMesh.material.uniforms.uTexture.value = targets.current.texture;
+            simMesh.material.uniforms.uBrushActive.value = brushActive; // Update brush active state
         }
 
         // Render to 'next' target
@@ -173,10 +177,27 @@ export default function Retrato() {
                 onPointerMove={(e) => {
                     // Update brush position with UV coordinates of the intersection
                     if (e.uv) brushUv.current.copy(e.uv);
+
+                    // Activate brush
+                    setBrushActive(1);
+
+                    // Clear existing timer
+                    if (mouseTimerRef.current) {
+                        clearTimeout(mouseTimerRef.current);
+                    }
+
+                    // Set new timer to deactivate brush after 300ms of no movement
+                    mouseTimerRef.current = setTimeout(() => {
+                        setBrushActive(0);
+                    }, 300);
                 }}
                 onPointerLeave={() => {
                     // Move brush off-screen when leaving
                     brushUv.current.set(-10, -10);
+                    setBrushActive(0);
+                    if (mouseTimerRef.current) {
+                        clearTimeout(mouseTimerRef.current);
+                    }
                 }}
             >
                 <planeGeometry args={[22, 8, 32, 32]} />

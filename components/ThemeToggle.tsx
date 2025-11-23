@@ -36,32 +36,42 @@ export default function ThemeToggle() {
             onClick={toggleTheme}
             className={`fixed top-6 right-6 z-50 p-2 transition-all duration-300 ${isAnimating ? 'scale-75 rotate-90' : 'scale-100 rotate-0'
                 } hover:scale-110`}
+            style={{
+                background: 'transparent',
+                border: 'none',
+            }}
             aria-label="Toggle theme"
         >
             {isDark ? (
-                // Moon icon - minimalist crescent
+                // Moon icon - white translucent glass
                 <svg
-                    width="24"
-                    height="24"
+                    width="28"
+                    height="28"
                     viewBox="0 0 24 24"
-                    fill="white"
+                    fill="rgba(255, 255, 255, 0.6)"
                     stroke="none"
+                    style={{
+                        filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)) drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2))',
+                    }}
                 >
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
             ) : (
-                // Sun icon - minimalist rays
+                // Sun icon - dark translucent glass
                 <svg
-                    width="24"
-                    height="24"
+                    width="28"
+                    height="28"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="black"
+                    stroke="rgba(0, 0, 0, 0.6)"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    style={{
+                        filter: 'drop-shadow(0 0 4px rgba(0, 0, 0, 0.2)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+                    }}
                 >
-                    <circle cx="12" cy="12" r="4" fill="black" />
+                    <circle cx="12" cy="12" r="4" fill="rgba(0, 0, 0, 0.6)" />
                     <line x1="12" y1="1" x2="12" y2="3" />
                     <line x1="12" y1="21" x2="12" y2="23" />
                     <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />

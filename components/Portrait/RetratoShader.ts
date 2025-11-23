@@ -151,6 +151,7 @@ export const simulationFragmentShader = `
   uniform vec2 uMouse;
   uniform vec2 uResolution;
   uniform float uTime;
+  uniform float uBrushActive; // 0.0 = inactive, 1.0 = active
   varying vec2 vUv;
 
   void main() {
@@ -162,18 +163,18 @@ export const simulationFragmentShader = `
     float dist = distance(vUv, uMouse);
     
     // Brush size and softness
-    float brushSize = 0.05;
+    float brushSize = 0.1; // Increased from 0.05 for larger brush area
     float brush = smoothstep(brushSize, 0.0, dist);
     
     // Add new ink to current state
     // We use the red channel for "displacement intensity"
     float intensity = current.r;
     
-    // Add brush influence
-    intensity += brush * 0.5; // Add ink
+    // Add brush influence - only when brush is active
+    intensity += brush * 0.5 * uBrushActive; // Multiplied by uBrushActive (fades out when mouse stops)
     
-    // Decay (Auto-clean)
-    intensity *= 0.96; // Fade out factor (0.96 = slow fade, 0.9 = fast)
+    // Decay (Auto-clean) - Slower decay for longer-lasting effect
+    intensity *= 0.985; // Increased from 0.96 (closer to 1.0 = slower fade)
     
     // Clamp
     intensity = clamp(intensity, 0.0, 1.0);
