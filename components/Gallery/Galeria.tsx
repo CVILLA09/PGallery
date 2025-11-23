@@ -25,10 +25,37 @@ export default function Galeria() {
 
             {/* Project Cards positioned within the new model corridor */}
             {/* Adjust positions based on the model's layout */}
+            {/* Project Cards positioned on the walls */}
             <group position={[0, 1.5, 0]}>
-                <ProjectCard position={[-2, 0, -5]} color="#ff0055" title="Project Alpha" />
-                <ProjectCard position={[2, 0, -10]} color="#0055ff" title="Project Beta" />
-                <ProjectCard position={[-2, 0, -15]} color="#00ff55" title="Project Gamma" />
+                {/* Center Wall (Back) - Landscape */}
+                <ProjectCard
+                    position={[0, 2.3, -9]}
+                    rotation={[0, 0, 0]}
+                    color="#ff0055"
+                    title="Project Alpha"
+                    width={8.15}
+                    height={4.75}
+                />
+
+                {/* Left Wall - Portrait/Square */}
+                <ProjectCard
+                    position={[-9, 2.3, 0.01]}
+                    rotation={[0, Math.PI / 2, 0]}
+                    color="#0055ff"
+                    title="Project Beta"
+                    width={9}
+                    height={5.1}
+                />
+
+                {/* Right Wall - Portrait/Square */}
+                <ProjectCard
+                    position={[9, 2.3, 0.01]}
+                    rotation={[0, -Math.PI / 2, 0]}
+                    color="#00ff55"
+                    title="Project Gamma"
+                    width={9}
+                    height={5.1}
+                />
             </group>
         </group>
     );

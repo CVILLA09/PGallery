@@ -1,35 +1,47 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { MathUtils } from 'three';
 
 interface ProjectCardProps {
     position: [number, number, number];
+    rotation?: [number, number, number];
     color: string;
     title: string;
+    width?: number;
+    height?: number;
 }
 
-export default function ProjectCard({ position, color, title }: ProjectCardProps) {
+export default function ProjectCard({
+    position,
+    rotation = [0, 0, 0],
+    color,
+    title,
+    width = 2,
+    height = 3
+}: ProjectCardProps) {
     const meshRef = useRef<any>(null);
     const [hovered, setHover] = useState(false);
 
-    useFrame((state, delta) => {
+    useFrame(() => {
         if (meshRef.current) {
-            // Subtle floating animation
-            meshRef.current.rotation.y += delta * 0.2;
+            const targetScale = hovered ? 1.05 : 1;
+            meshRef.current.scale.x = MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
+            meshRef.current.scale.y = MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
+            meshRef.current.scale.z = MathUtils.lerp(meshRef.current.scale.z, targetScale, 0.1);
         }
     });
 
     return (
-        <group position={position}>
+        <group position={position} rotation={rotation}>
             <mesh
                 ref={meshRef}
                 onPointerOver={() => setHover(true)}
                 onPointerOut={() => setHover(false)}
-                scale={hovered ? 1.1 : 1}
             >
-                <boxGeometry args={[2, 3, 0.1]} />
+                <boxGeometry args={[width, height, 0.1]} />
                 <meshStandardMaterial color={color} />
             </mesh>
             <Text
