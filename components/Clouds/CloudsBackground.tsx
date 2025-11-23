@@ -10,10 +10,17 @@ function CloudScene() {
 
     useFrame((state, delta) => {
         if (groupRef.current) {
-            // Gentle wind movement
-            // Rotating slowly gives a nice parallax effect for background clouds
-            groupRef.current.rotation.y += delta * 0.05;
-            // Add a slight floating bob
+            // Linear wind movement (fixed direction)
+            // Move along X axis
+            groupRef.current.position.x += delta * 0.5;
+
+            // Reset position to loop (infinite scroll effect)
+            // Assuming clouds are scattered around X=0, we reset when they go too far right
+            if (groupRef.current.position.x > 15) {
+                groupRef.current.position.x = -15;
+            }
+
+            // Gentle floating bob (vertical)
             groupRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.2) * 0.5;
         }
     });
