@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { MathUtils } from 'three';
+import { useCameraStore } from '../../store/useCameraStore';
 
 interface ProjectCardProps {
     position: [number, number, number];
@@ -24,6 +25,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
     const meshRef = useRef<any>(null);
     const [hovered, setHover] = useState(false);
+    const setFocusTarget = useCameraStore((state) => state.setFocusTarget);
 
     useFrame(() => {
         if (meshRef.current) {
@@ -34,12 +36,30 @@ export default function ProjectCard({
         }
     });
 
+    const handleClick = (e: any) => {
+        e.stopPropagation(); // Prevent click-through
+        // Determine type based on rotation (approximate)
+        const isSide = Math.abs(rotation[1]) > 0.1;
+
+        // Calculate world position (simplified, assuming parent group is at [0, 1.5, 0] and gallery at [0, -4, -15])
+        // Actually, we can just pass the local props and let CameraRig handle the logic, 
+        // OR pass the "type" and let CameraRig decide the target.
+        // Passing the card's intended "viewing" parameters is safer.
+
+        setFocusTarget({
+            position: position,
+            rotation: rotation,
+            type: isSide ? 'side' : 'center'
+        });
+    };
+
     return (
         <group position={position} rotation={rotation}>
             <mesh
                 ref={meshRef}
                 onPointerOver={() => setHover(true)}
                 onPointerOut={() => setHover(false)}
+                onClick={handleClick}
             >
                 <boxGeometry args={[width, height, 0.1]} />
                 <meshStandardMaterial color={color} />
