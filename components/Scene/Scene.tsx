@@ -7,19 +7,19 @@ import Galeria from '../Gallery/Galeria';
 import { useState, useEffect } from 'react';
 
 export default function Scene() {
-    const [bgColor, setBgColor] = useState('#ffffff');
+    const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
         // Initial check
-        const updateBg = () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            setBgColor(isDark ? '#000000' : '#ffffff');
+        const checkTheme = () => {
+            const dark = document.documentElement.classList.contains('dark');
+            setIsDark(dark);
         };
 
-        updateBg();
+        checkTheme();
 
         // Watch for class changes
-        const observer = new MutationObserver(updateBg);
+        const observer = new MutationObserver(checkTheme);
         observer.observe(document.documentElement, {
             attributes: true,
             attributeFilter: ['class'],
@@ -27,6 +27,11 @@ export default function Scene() {
 
         return () => observer.disconnect();
     }, []);
+
+    // Day mode: Transparent background (to show clouds), White fog (to blend with clouds)
+    // Night mode: Black background, Black fog
+    const bgColor = isDark ? '#000000' : 'transparent';
+    const fogColor = isDark ? '#000000' : '#ffffff';
 
     return (
         <Canvas
@@ -36,7 +41,7 @@ export default function Scene() {
             <CameraRig />
             <Retrato />
             <Galeria />
-            <fog attach="fog" args={[bgColor, 10, 50]} />
+            <fog attach="fog" args={[fogColor, 10, 50]} />
         </Canvas>
     );
 }
