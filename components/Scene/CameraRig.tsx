@@ -38,7 +38,7 @@ export default function CameraRig() {
                 // If rotation[1] is negative (-PI/2), it's Right Wall -> Look Right (Negative RotY)
                 targetRotY = focusTarget.rotation[1];
             } else {
-                targetZ = -18; // Center Wall -> Look Forward
+                targetZ = -15; // Center Wall -> Look Forward
                 targetRotY = 0;
             }
 
