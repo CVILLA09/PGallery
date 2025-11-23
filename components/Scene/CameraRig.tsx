@@ -34,9 +34,17 @@ export default function CameraRig() {
 
             if (focusTarget.type === 'side') {
                 targetZ = -15; // Side cards are closer
-                // If rotation[1] is positive (PI/2), it's Left Wall -> Look Left (Positive RotY)
-                // If rotation[1] is negative (-PI/2), it's Right Wall -> Look Right (Negative RotY)
-                targetRotY = focusTarget.rotation[1];
+
+                // Determine rotation based on X position
+                // Left Wall (X < 0) -> Look Left (Positive RotY)
+                // Right Wall (X > 0) -> Look Right (Negative RotY)
+                if (focusTarget.position[0] < -2) {
+                    targetRotY = Math.PI / 2;
+                } else if (focusTarget.position[0] > 2) {
+                    targetRotY = -Math.PI / 2;
+                } else {
+                    targetRotY = 0; // Fallback
+                }
             } else {
                 targetZ = -15; // Center Wall -> Look Forward
                 targetRotY = 0;

@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { MathUtils } from 'three';
+import { MathUtils, Vector3, Quaternion, Euler } from 'three';
 import { useCameraStore } from '../../store/useCameraStore';
 
 interface ProjectCardProps {
@@ -38,19 +38,26 @@ export default function ProjectCard({
 
     const handleClick = (e: any) => {
         e.stopPropagation(); // Prevent click-through
-        // Determine type based on rotation (approximate)
-        const isSide = Math.abs(rotation[1]) > 0.1;
 
-        // Calculate world position (simplified, assuming parent group is at [0, 1.5, 0] and gallery at [0, -4, -15])
-        // Actually, we can just pass the local props and let CameraRig handle the logic, 
-        // OR pass the "type" and let CameraRig decide the target.
-        // Passing the card's intended "viewing" parameters is safer.
+        if (meshRef.current) {
+            const worldPosition = new Vector3();
+            const worldQuaternion = new Quaternion();
+            const worldRotation = new Euler();
 
-        setFocusTarget({
-            position: position,
-            rotation: rotation,
-            type: isSide ? 'side' : 'center'
-        });
+            meshRef.current.getWorldPosition(worldPosition);
+            meshRef.current.getWorldQuaternion(worldQuaternion);
+            worldRotation.setFromQuaternion(worldQuaternion);
+
+            // Determine type based on world rotation
+            // If rotation around Y is significant (approx +/- 90 deg or PI/2 = 1.57), it's a side wall
+            const isSide = Math.abs(worldRotation.y) > 0.5;
+
+            setFocusTarget({
+                position: [worldPosition.x, worldPosition.y, worldPosition.z],
+                rotation: [worldRotation.x, worldRotation.y, worldRotation.z],
+                type: isSide ? 'side' : 'center'
+            });
+        }
     };
 
     return (

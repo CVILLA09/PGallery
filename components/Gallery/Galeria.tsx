@@ -8,7 +8,7 @@ export default function Galeria() {
     const { scene } = useGLTF('/assets/models/vr_art_gallery.glb');
 
     return (
-        <group position={[0, -4, -15]}>
+        <group position={[0, -4, -15]} rotation={[0, -Math.PI * 1.5, 0]}>
             {/* Fog for depth integration - White fog to match background */}
             <fog attach="fog" args={['#ffffff', 5, 40]} />
 
@@ -39,12 +39,12 @@ export default function Galeria() {
 
                 {/* Left Wall - Portrait/Square */}
                 <ProjectCard
-                    position={[-9, 2.3, 0.01]}
-                    rotation={[0, Math.PI / 2, 0]}
+                    position={[0, 2.3, 9]}
+                    rotation={[0, 0, 0]}
                     color="#0055ff"
                     title="Project Beta"
-                    width={9}
-                    height={5.1}
+                    width={8.15}
+                    height={4.75}
                 />
 
                 {/* Right Wall - Portrait/Square */}
