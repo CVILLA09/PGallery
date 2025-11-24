@@ -29,12 +29,12 @@ export default function Galeria() {
             <group position={[0, 1.5, 0]}>
                 {/* Center Wall (Back) - Landscape */}
                 <ProjectCard
-                    position={[0, 2.3, -9]}
+                    position={[-0.05, 2.3, -9]}
                     rotation={[0, 0, 0]}
                     color="#ff0055"
                     title="Project Alpha"
-                    width={8.15}
-                    height={4.75}
+                    width={9}
+                    height={5}
                 />
 
                 {/* Left Wall - Portrait/Square */}
@@ -43,8 +43,8 @@ export default function Galeria() {
                     rotation={[0, 0, 0]}
                     color="#0055ff"
                     title="Project Beta"
-                    width={8.15}
-                    height={4.75}
+                    width={9}
+                    height={5}
                 />
 
                 {/* Right Wall - Portrait/Square */}
@@ -54,7 +54,7 @@ export default function Galeria() {
                     color="#00ff55"
                     title="Project Gamma"
                     width={9}
-                    height={5.1}
+                    height={5.15}
                 />
             </group>
         </group>
