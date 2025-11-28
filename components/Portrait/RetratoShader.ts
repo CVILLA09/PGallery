@@ -221,3 +221,51 @@ export const hallucinationFragmentShader = `
     gl_FragColor = color;
   }
 `;
+
+// --- ANIMATED GRADIENT SHADER (New Screen) ---
+// --- ANIMATED GRADIENT SHADER (New Screen) ---
+export const gradientFragmentShader = `
+  uniform float uTime;
+  varying vec2 vUv;
+
+  // Colors
+  vec3 gray = vec3(0.533, 0.537, 0.549); // #88898C
+  vec3 purple = vec3(0.522, 0.502, 0.651); // #8580A6
+  vec3 lightPurple = vec3(0.576, 0.525, 0.651); // #9386A6
+
+  void main() {
+    vec2 uv = vUv;
+    
+    // 1. Create a dynamic animated pattern for the center (Purple)
+    // Mimic the "CSS Animated Gradient" look with moving sine waves
+    float wave1 = sin(uv.x * 3.0 + uTime * 0.5);
+    float wave2 = cos(uv.y * 5.0 + uTime * 0.3);
+    float wave3 = sin((uv.x + uv.y) * 4.0 - uTime * 0.4);
+    
+    float pattern = (wave1 + wave2 + wave3) / 3.0; // -1 to 1
+    pattern = pattern * 0.5 + 0.5; // 0 to 1
+    
+    // Mix between Purple and Light Purple based on the pattern
+    vec3 centerColor = mix(purple, lightPurple, pattern);
+    
+    // 2. Create a Radial Vignette (Gray Outside, Purple Center)
+    // Distance from center (0.5, 0.5)
+    float dist = distance(uv, vec2(0.5));
+    
+    // Portal/Peephole Effect
+    // Sharper transition to define the "hole" clearly
+    // 0.0 to 0.15 = Pure Purple Center
+    // 0.15 to 0.5 = Rapid transition to Gray
+    float vignette = smoothstep(0.15, 0.5, dist);
+    
+    // Mix Center Color with Gray based on distance
+    // We want the center to be VERY purple and the outside VERY gray
+    vec3 finalColor = mix(centerColor, gray, vignette);
+    
+    // Add subtle grain/noise for texture
+    float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
+    finalColor += noise * 0.03;
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;

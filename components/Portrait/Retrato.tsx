@@ -18,7 +18,7 @@ import {
     NearestFilter,
     ClampToEdgeWrapping
 } from 'three';
-import { vertexShader, psychedelicFragmentShader, hallucinationFragmentShader, simulationFragmentShader } from './RetratoShader';
+import { vertexShader, psychedelicFragmentShader, hallucinationFragmentShader, simulationFragmentShader, gradientFragmentShader } from './RetratoShader';
 
 export default function Retrato() {
     const topStripRef = useRef<any>(null);
@@ -84,6 +84,14 @@ export default function Retrato() {
         [texture]
     );
 
+    const gradientUniforms = useMemo(
+        () => ({
+            uTime: { value: 0 },
+            uScroll: { value: 0 },
+        }),
+        []
+    );
+
     // Store brush UV position
     const brushUv = useRef(new Vector2(-10, -10));
     const [brushActive, setBrushActive] = useState(0); // 0 = inactive, 1 = active
@@ -106,7 +114,16 @@ export default function Retrato() {
         tl.to([topStripRef.current.scale, bottomStripRef.current.scale, borderRef.current.scale], {
             x: 2,
             ease: 'none',
+            duration: 1, // Explicit duration to normalize timeline
         }, 0);
+
+        // Animate uScroll uniform from 0 to 1
+        // "Short lapse" transition - Extremely fast at the very end (crossing point: 90% to 98%)
+        tl.to(gradientUniforms.uScroll, {
+            value: 1,
+            ease: 'none',
+            duration: 0.08,
+        }, 0.90);
 
         return () => {
             tl.kill();
@@ -155,6 +172,9 @@ export default function Retrato() {
             borderRef.current.material.uniforms.uTime.value = time;
             borderRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
         }
+
+        // Update gradient shader time
+        gradientUniforms.uTime.value = time;
     });
 
     return (
@@ -217,6 +237,16 @@ export default function Retrato() {
                     fragmentShader={psychedelicFragmentShader}
                     uniforms={psychedelicUniforms} // Use same uniforms as strips
                     transparent
+                />
+            </mesh>
+
+            {/* Animated Gradient Screen - Fills gap between eyes and bottom strip */}
+            <mesh position={[0, 0, -4.5]}>
+                <planeGeometry args={[9, 5, 32, 32]} />
+                <shaderMaterial
+                    vertexShader={vertexShader}
+                    fragmentShader={gradientFragmentShader}
+                    uniforms={gradientUniforms}
                 />
             </mesh>
 
