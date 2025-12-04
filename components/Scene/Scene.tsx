@@ -40,7 +40,11 @@ export default function Scene() {
         >
             <CameraRig />
             <Retrato />
-            <Galeria />
+            <Galeria
+                wallColor="#f2ede8"      // Paredes: Gris cálido muy claro
+                ceilingColor="#fafaf8"   // Techo: Blanco casi puro
+                floorColor="#96806c"     // Suelo: Madera natural oscura (basado en paleta)
+            />
             <fog attach="fog" args={[fogColor, 10, 50]} />
         </Canvas>
     );
