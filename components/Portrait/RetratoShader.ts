@@ -193,6 +193,7 @@ export const hallucinationFragmentShader = `
   uniform sampler2D uTexture;
   uniform sampler2D uDisplacement; // From simulation
   uniform float uTime;
+  uniform float uOpacity; // Scroll-driven opacity
   varying vec2 vUv;
 
   void main() {
@@ -223,7 +224,8 @@ export const hallucinationFragmentShader = `
     // Add a slight "wet" highlight where displacement is high
     color.rgb += vec3(0.1) * displacement;
     
-    gl_FragColor = color;
+    // Apply scroll-driven opacity
+    gl_FragColor = vec4(color.rgb, uOpacity);
   }
 `;
 

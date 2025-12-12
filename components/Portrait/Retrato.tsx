@@ -104,6 +104,7 @@ export default function Retrato() {
             uTexture: { value: texture },
             uDisplacement: { value: null }, // Will be updated from FBO
             uTime: { value: 0 },
+            uOpacity: { value: 1.0 }, // Start fully opaque
         }),
         [texture]
     );
@@ -121,7 +122,7 @@ export default function Retrato() {
     const [brushActive, setBrushActive] = useState(0); // 0 = inactive, 1 = active
     const mouseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Setup scroll-driven animations for strip width
+    // Setup scroll-driven animations for strip width and eyes opacity
     useEffect(() => {
         if (!topStripRef.current || !bottomStripRef.current || !borderRef.current) return;
 
@@ -148,6 +149,14 @@ export default function Retrato() {
             ease: 'none',
             duration: 0.08,
         }, 0.90);
+
+        // Fade out central eyes image as we scroll forward (opacity 1.0 -> 0.05)
+        // This creates the effect of "passing through" the eyes
+        tl.to(hallucinationUniforms.uOpacity, {
+            value: 0.05,
+            ease: 'none',
+            duration: 0.6, // Gradual fade over 60% of scroll progress
+        }, 0.2); // Start fading at 20% scroll progress
 
         return () => {
             tl.kill();
