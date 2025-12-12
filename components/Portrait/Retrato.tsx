@@ -67,10 +67,34 @@ export default function Retrato() {
         return [scene, camera, mesh, { current: t1, next: t2 }];
     }, []);
 
-    const psychedelicUniforms = useMemo(
+    // Separate uniforms for each strip with vertical offsets
+    // Total canvas height = 3 sections (top=2, middle/border=1, bottom=0)
+    const topStripUniforms = useMemo(
         () => ({
             uTime: { value: 0 },
             uMouse: { value: new Vector2(0, 0) },
+            uVerticalOffset: { value: 2.0 }, // Top section
+            uTotalHeight: { value: 3.0 },
+        }),
+        []
+    );
+
+    const bottomStripUniforms = useMemo(
+        () => ({
+            uTime: { value: 0 },
+            uMouse: { value: new Vector2(0, 0) },
+            uVerticalOffset: { value: 0.0 }, // Bottom section
+            uTotalHeight: { value: 3.0 },
+        }),
+        []
+    );
+
+    const borderUniforms = useMemo(
+        () => ({
+            uTime: { value: 0 },
+            uMouse: { value: new Vector2(0, 0) },
+            uVerticalOffset: { value: 1.0 }, // Middle section (behind eyes)
+            uTotalHeight: { value: 3.0 },
         }),
         []
     );
@@ -161,16 +185,16 @@ export default function Retrato() {
 
         // --- OTHER UNIFORMS (Keep global for strips/border as requested previously, or update if needed) ---
         if (topStripRef.current) {
-            topStripRef.current.material.uniforms.uTime.value = time;
-            topStripRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
+            topStripUniforms.uTime.value = time;
+            topStripUniforms.uMouse.value.set(pointer.x, pointer.y);
         }
         if (bottomStripRef.current) {
-            bottomStripRef.current.material.uniforms.uTime.value = time;
-            bottomStripRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
+            bottomStripUniforms.uTime.value = time;
+            bottomStripUniforms.uMouse.value.set(pointer.x, pointer.y);
         }
         if (borderRef.current) {
-            borderRef.current.material.uniforms.uTime.value = time;
-            borderRef.current.material.uniforms.uMouse.value.set(pointer.x, pointer.y);
+            borderUniforms.uTime.value = time;
+            borderUniforms.uMouse.value.set(pointer.x, pointer.y);
         }
 
         // Update gradient shader time
@@ -185,7 +209,7 @@ export default function Retrato() {
                 <shaderMaterial
                     vertexShader={vertexShader}
                     fragmentShader={psychedelicFragmentShader}
-                    uniforms={psychedelicUniforms}
+                    uniforms={topStripUniforms}
                     transparent
                 />
             </mesh>
@@ -235,7 +259,7 @@ export default function Retrato() {
                 <shaderMaterial
                     vertexShader={vertexShader}
                     fragmentShader={psychedelicFragmentShader}
-                    uniforms={psychedelicUniforms} // Use same uniforms as strips
+                    uniforms={borderUniforms} // Use border uniforms for middle section
                     transparent
                 />
             </mesh>
@@ -256,7 +280,7 @@ export default function Retrato() {
                 <shaderMaterial
                     vertexShader={vertexShader}
                     fragmentShader={psychedelicFragmentShader}
-                    uniforms={psychedelicUniforms}
+                    uniforms={bottomStripUniforms}
                     transparent
                 />
             </mesh>

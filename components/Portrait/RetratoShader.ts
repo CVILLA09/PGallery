@@ -11,6 +11,8 @@ export const vertexShader = `
 export const psychedelicFragmentShader = `
   uniform float uTime;
   uniform vec2 uMouse;
+  uniform float uVerticalOffset; // Offset for this strip in the continuous canvas (0.0 to 1.0)
+  uniform float uTotalHeight; // Total normalized height of the entire canvas
   varying vec2 vUv;
 
   // Function to convert hex to vec3 (approximate manual conversion for efficiency)
@@ -29,7 +31,10 @@ export const psychedelicFragmentShader = `
   vec3 col10 = vec3(0.051, 0.051, 0.051); // #0D0D0D
 
   void main() {
+    // Map local UV to the continuous canvas position
+    // Each strip shows only its portion of the total vertical space
     vec2 uv = vUv;
+    uv.y = (uv.y + uVerticalOffset) / uTotalHeight;
     
     // Global Interaction - ULTRA SENSITIVE
     // Amplify mouse effect significantly to catch slow and fast movements
